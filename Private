@@ -1,0 +1,65 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua",true))()
+
+
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Camera = game.Workspace.Camera
+local Players = game.Players
+local Player = Players.LocalPlayer
+local Mouse = Player:GetMouse()
+
+local SilentAimPart = "Head"
+
+local FovCircle = Drawing.new("Circle")
+FovCircle.Radius = 30
+FovCircle.Visible = true
+FovCircle.NumSides = 128
+FovCircle.Thickness = 2.5
+FovCircle.Color = Color3.fromRGB(0,0,0)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    FovCircle.Position = UserInputService:GetMouseLocation()
+end)
+
+local function GetFovTarget()
+    local Target
+    local LowestDistance = math.huge
+
+    for i,v in pairs(Players.GetPlayers(Players)) do
+        local Char = v.Character
+
+        if v ~= Player and Char then
+            local Hmrp = Char.FindFirstChild(Char,"HumanoidRootPart")
+            local SilentPart = Char.FindFirstChild(Char,SilentAimPart)
+
+            if Hmrp and SilentPart then
+                local ScreenPos,OnScreen = Camera.WorldToViewportPoint(Camera,Hmrp.Position)
+                local Distance = (FovCircle.Position - Vector2.new(ScreenPos.X,ScreenPos.Y)).Magnitude
+
+                if Distance < FovCircle.Radius and Distance < LowestDistance and OnScreen then
+                    Target = v
+                    LowestDistance = Distance
+                end
+            end
+        end
+    end
+
+    return Target
+end
+
+oldNamecall = hookmetamethod(game,"__namecall",function(self,...)
+    if getnamecallmethod() == "Raycast" then
+        local args = {...}
+
+        local Target = GetFovTarget()
+
+        if Target then
+            args[2] = Target.Character[SilentAimPart].Position - args[1]
+
+            return oldNamecall(self,unpack(args))
+        end
+    end
+
+    return oldNamecall(self,...)
+end)
