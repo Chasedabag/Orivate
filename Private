@@ -12,7 +12,7 @@ local Mouse = Player:GetMouse()
 local SilentAimPart = "Head"
 
 local FovCircle = Drawing.new("Circle")
-FovCircle.Radius = 30
+FovCircle.Radius = 20
 FovCircle.Visible = true
 FovCircle.NumSides = 128
 FovCircle.Thickness = 2.5
