@@ -112,7 +112,7 @@ local function ESP(plr)
                         -- Update Name ESP
                         library.name.Position = Vector2.new(head.X, head.Y - DistanceY * 2.2) -- Slightly above the head
                         library.name.Text = plr.DisplayName -- Fixed nickname display
-                        library.name.Size = 14 -- Fixed size
+                        library.name.Size = 12 -- Fixed size
 
                         if Team_Check.TeamCheck then
                             if plr.TeamColor == player.TeamColor then
