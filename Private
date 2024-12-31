@@ -1,5 +1,8 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua",true))()
 
+local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/Sepper2023/Scorp.xyz/refs/heads/main/LinoriaFixed'))()
+local ThemeManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/Awakenchan/Misc-Release/main/linoracolor'))()
+local SaveManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/Sepper2023/Scorp.xyz/refs/heads/main/SaveManagerFixed'))()
 
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -10,17 +13,61 @@ local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
 local SilentAimPart = "Head"
+local SilentAim = false
 
-local FovCircle = Drawing.new("Circle")
-FovCircle.Radius = 20
-FovCircle.Visible = true
-FovCircle.NumSides = 128
-FovCircle.Thickness = 2.5
-FovCircle.Color = Color3.fromRGB(0,0,0)
+
+local SilentFovCircle = Drawing.new("Circle")
+SilentFovCircle.Radius = 20
+SilentFovCircle.Visible = true
+SilentFovCircle.NumSides = 128
+SilentFovCircle.Thickness = 2.5
+SilentFovCircle.Color = Color3.fromRGB(0,0,0)
 
 game:GetService("RunService").RenderStepped:Connect(function()
-    FovCircle.Position = UserInputService:GetMouseLocation()
+    SilentFovCircle.Position = UserInputService:GetMouseLocation()
 end)
+
+local Window = Library:CreateWindow({
+    Title = 'OneTake | Planks',
+    Center = true,
+    AutoShow = true,
+    TabPadding = 8,
+    MenuFadeTime = 0.2
+})
+
+Library.KeybindFrame.Visible = true
+
+
+local Tabs = {
+    Combat = Window:AddTab('Combat'),
+    Settings = Window:AddTab("Settings")
+}
+
+local Combat_SilentAim = Tabs.Combat:AddLeftGroupbox("Silent-Aim")
+
+
+Combat_SilentAim:AddSlider('SilentFovSize', {
+    Text = 'Size',
+    Default = 150,
+    Min = 10,
+    Max = 500,
+    Rounding = 0,
+    Compact = false,
+    Callback = function(value)
+        SilentFovCircle.Radius = value
+    end
+})
+
+Combat_SilentAim:AddToggle('SilentAim', {
+    Text = "Enable",
+    Default = false,
+    Tooltip = nil,
+    Callback = function(value)
+        SilentAim = value
+    end
+})
+
+
 
 local function GetFovTarget()
     local Target
@@ -35,9 +82,9 @@ local function GetFovTarget()
 
             if Hmrp and SilentPart then
                 local ScreenPos,OnScreen = Camera.WorldToViewportPoint(Camera,Hmrp.Position)
-                local Distance = (FovCircle.Position - Vector2.new(ScreenPos.X,ScreenPos.Y)).Magnitude
+                local Distance = (SilentFovCircle.Position - Vector2.new(ScreenPos.X,ScreenPos.Y)).Magnitude
 
-                if Distance < FovCircle.Radius and Distance < LowestDistance and OnScreen then
+                if Distance < SilentFovCircle.Radius and Distance < LowestDistance and OnScreen then
                     Target = v
                     LowestDistance = Distance
                 end
@@ -52,7 +99,7 @@ oldNamecall = hookmetamethod(game,"__namecall",function(self,...)
     if getnamecallmethod() == "Raycast" then
         local args = {...}
 
-        local Target = GetFovTarget()
+        local Target = GetFovTarget(SilentFovCircle)
 
         if Target then
             args[2] = Target.Character[SilentAimPart].Position - args[1]
