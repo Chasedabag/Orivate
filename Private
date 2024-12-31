@@ -46,6 +46,28 @@ local Tabs = {
 local Combat_SilentAim = Tabs.Combat:AddLeftGroupbox("Silent-Aim")
 
 
+
+
+Combat_SilentAim:AddToggle('SilentAim', {
+    Text = "Enable",
+    Default = false,
+    Tooltip = nil,
+    Callback = function(value)
+        SilentAim = value
+    end
+})
+
+
+Combat_SilentAim:AddDropdown('SilentHitBone', {
+    Values = {"Head","HumanoidRootPart"},
+    Default = 1,
+    Multi = false,
+    Text = "HitBone",
+    Callback = function(Value)
+        SilentAimPart = Value
+    end
+})
+
 Combat_SilentAim:AddSlider('SilentFovSize', {
     Text = 'Size',
     Default = 150,
@@ -57,16 +79,6 @@ Combat_SilentAim:AddSlider('SilentFovSize', {
         SilentFovCircle.Radius = value
     end
 })
-
-Combat_SilentAim:AddToggle('SilentAim', {
-    Text = "Enable",
-    Default = false,
-    Tooltip = nil,
-    Callback = function(value)
-        SilentAim = value
-    end
-})
-
 
 
 local function GetFovTarget()
