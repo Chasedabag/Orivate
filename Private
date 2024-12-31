@@ -40,11 +40,23 @@ Library.KeybindFrame.Visible = true
 
 local Tabs = {
     Combat = Window:AddTab('Combat'),
+    Visuals = Window:AddTab('Visuals'),
     Settings = Window:AddTab("Settings")
 }
 
-local Combat_SilentAim = Tabs.Combat:AddLeftGroupbox("Silent-Aim")
+ThemeManager:SetLibrary(Library)
+ThemeManager:ApplyToTab(Tabs.Settings)
+ThemeManager:ApplyTheme("Tokyo Night")
 
+SaveManager:SetLibrary(Library)
+SaveManager:SetFolder('DahillsConfig')
+SaveManager:IgnoreThemeSettings()
+SaveManager:BuildConfigSection(Tabs.Settings)
+Library:SetWatermark('https://discord.gg/t9yJxRy6')
+
+
+local Combat_SilentAim = Tabs.Combat:AddLeftGroupbox("Silent-Aim")
+local Visuals_ESP = Tabs.Visuals:AddLeftGroupbox("Visuals")
 
 
 
@@ -70,15 +82,16 @@ Combat_SilentAim:AddDropdown('SilentHitBone', {
 
 Combat_SilentAim:AddSlider('SilentFovSize', {
     Text = 'Size',
-    Default = 150,
-    Min = 10,
-    Max = 500,
+    Default = 20,
+    Min = 0,
+    Max = 250,
     Rounding = 0,
     Compact = false,
     Callback = function(value)
         SilentFovCircle.Radius = value
     end
 })
+
 
 
 local function GetFovTarget()
