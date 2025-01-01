@@ -1,0 +1,96 @@
+-- Services
+local replicated_storage = game:GetService("ReplicatedStorage");
+local replicated_first = game:GetService("ReplicatedFirst");
+local run_service = game:GetService("RunService");
+local players = game:GetService("Players");
+
+-- Variables
+local params = RaycastParams.new(); do
+    params.FilterType = Enum.RaycastFilterType.Exclude;
+end
+
+local local_player = players.LocalPlayer;
+
+local remotes = replicated_storage.Remotes;
+local modules = replicated_first.Modules;
+
+local damage = remotes.CarbonEngine.Damage;
+
+-- Cache
+local find_part_on_ray = workspace.FindPartOnRayWithIgnoreList;
+
+-- Modules
+local raycast = require(modules.Client.Utilities.Raycast);
+
+-- Main
+do
+    local damage_player = function(character)
+        local head = character:FindFirstChild("Head");
+        local humanoid = character:FindFirstChildOfClass("Humanoid");
+    
+        if (not character) or (not head) or (not humanoid) then
+            return;
+        end
+        
+        local local_character = local_player.Character;
+    
+        if (not local_character) then
+            return;
+        end
+    
+        local origin_position = local_character.Head.Position;
+        local direction = (head.Position - origin_position).Unit;
+    
+        damage:FireServer(humanoid, head.Name, origin_position, direction, head);
+        raycast.PlayerHit:Fire(humanoid, head.Name, 100);
+    end
+
+    local get_target = function()
+        local closest, closest_distance = nil, 300;
+
+        for _, player in players:GetPlayers() do
+            local character = player.Character;
+            local local_character = local_player.Character;
+
+            if (player == local_player) then
+                continue;
+            end
+
+            if (not character) or (not local_character) then
+                continue;
+            end
+
+            local root_part = character:FindFirstChild("HumanoidRootPart");
+
+            if (not root_part) then
+                continue;
+            end
+
+            local distance = (root_part.Position - local_character.HumanoidRootPart.Position).Magnitude;
+
+            if (distance > closest_distance) then
+                continue;
+            end
+
+            local ray = Ray.new(local_character.HumanoidRootPart.Position, (root_part.Position - local_character.HumanoidRootPart.Position).Unit * distance);
+            local hit_scan = find_part_on_ray(workspace, ray, {local_player.Character, workspace.CurrentCamera}, false, false);
+
+            if (not hit_scan) or (not hit_scan:IsDescendantOf(character)) then
+                continue;
+            end
+
+            closest = player;
+            closest_distance = distance;
+        end
+
+        return closest;
+    end
+
+    run_service.RenderStepped:Connect(function()
+        local target = get_target();
+
+        if (target) then
+            damage_player(target.Character);
+        end
+    end)
+end
